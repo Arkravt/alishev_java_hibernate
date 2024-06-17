@@ -1,0 +1,5 @@
+# Конфигурация источника данных (Data source)
+hibernate.driver_class=
+hibernate.connection.url=
+hibernate.connection.username=
+hibernate.connection.password=
