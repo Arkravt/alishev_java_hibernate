@@ -4,8 +4,6 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.*;
 import ru.hibernate.example.model.Person;
 
-import java.util.List;
-
 public class App {
     public static void main(String[] args) {
 
@@ -22,9 +20,10 @@ public class App {
 //        savePerson(new Person("Zina", 44)); // save person to DB
 
 //        updatePerson(2); // update person in DB
+
 //        deletePerson(3); // delete person from DB
 
-        getPeopleHQL(); // HQL
+//        getPeopleHQL(); // HQL
 
     }
 
