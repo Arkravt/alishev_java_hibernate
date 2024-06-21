@@ -2,30 +2,56 @@ package ru.hibernate.example;
 
 import org.hibernate.cfg.Configuration;
 import org.hibernate.*;
+import ru.hibernate.example.model.Item;
 import ru.hibernate.example.model.Person;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class App {
     public static void main(String[] args) {
 
-//        Person person = getPerson(1); // get person from DB
+        // simpleExample();
 
-//        savePerson(new Person("Ivan", 21)); // save person to DB
-//        savePerson(new Person("Artem", 36)); // save person to DB
-//        savePerson(new Person("Katya", 43)); // save person to DB
-//        savePerson(new Person("Tanya", 21)); // save person to DB
-//        savePerson(new Person("Alexey", 30)); // save person to DB
-//        savePerson(new Person("Sergey", 48)); // save person to DB
-//        savePerson(new Person("Misha", 29)); // save person to DB
-//        savePerson(new Person("Sveta", 34)); // save person to DB
-//        savePerson(new Person("Zina", 44)); // save person to DB
-
-//        updatePerson(2); // update person in DB
-
-//        deletePerson(3); // delete person from DB
-
-//        getPeopleHQL(); // HQL
+        advancedExample();
 
     }
+
+
+    public static void simpleExample() {
+
+        Person person = getPerson(1); // get person from DB
+
+        savePerson(new Person("Ivan", 21)); // save person to DB
+        savePerson(new Person("Artem", 36)); // save person to DB
+        savePerson(new Person("Katya", 43)); // save person to DB
+        savePerson(new Person("Tanya", 21)); // save person to DB
+        savePerson(new Person("Alexey", 30)); // save person to DB
+        savePerson(new Person("Sergey", 48)); // save person to DB
+        savePerson(new Person("Misha", 29)); // save person to DB
+        savePerson(new Person("Sveta", 34)); // save person to DB
+        savePerson(new Person("Zina", 44)); // save person to DB
+
+        updatePerson(2); // update person in DB
+
+        deletePerson(3); // delete person from DB
+
+        getPeopleHQL(); // HQL
+
+    }
+
+    public static void advancedExample() {
+
+//        getItemsByPersonId(1);
+//        getPersonByItemId(3);
+//        saveNewItem(4);
+//        saveNewItemAndNewPerson();
+//        deleteItemByPersonId(1);
+        //deletePersonById(6);
+        setNewOwnerForItem(4, 7);
+    }
+
 
     public static Person getPerson(int id) {
 
@@ -126,4 +152,188 @@ public class App {
             sessionFactory.close();
         }
     }
+
+
+    public static void getItemsByPersonId(int id) {
+
+        Configuration configuration = new Configuration()
+                .addAnnotatedClass(Person.class)
+                .addAnnotatedClass(Item.class);
+
+        SessionFactory sessionFactory = configuration.buildSessionFactory();
+        Session session = sessionFactory.getCurrentSession();
+
+        try {
+            session.beginTransaction();
+
+            Person person = session.get(Person.class, id);
+            List<Item> items = person.getItems();
+
+            session.getTransaction().commit();
+        } finally {
+            session.close();
+            sessionFactory.close();
+        }
+    }
+
+    public static void getPersonByItemId(int id) {
+
+        Configuration configuration = new Configuration()
+                .addAnnotatedClass(Person.class)
+                .addAnnotatedClass(Item.class);
+
+        SessionFactory sessionFactory = configuration.buildSessionFactory();
+        Session session = sessionFactory.getCurrentSession();
+
+        try {
+            session.beginTransaction();
+
+            Item item = session.get(Item.class, id);
+            Person person = item.getOwner();
+            System.out.println(person.getName());
+
+            session.getTransaction().commit();
+        } finally {
+            session.close();
+            sessionFactory.close();
+        }
+    }
+
+    public static void saveNewItem(int person_id) {
+
+        Configuration configuration = new Configuration()
+                .addAnnotatedClass(Person.class)
+                .addAnnotatedClass(Item.class);
+
+        SessionFactory sessionFactory = configuration.buildSessionFactory();
+        Session session = sessionFactory.getCurrentSession();
+
+        try {
+            session.beginTransaction();
+
+            Person person = session.get(Person.class, person_id);
+            Item newItem = new Item("Mercedes", person);
+            person.getItems().add(newItem);
+
+            session.save(newItem);
+
+            session.getTransaction().commit();
+        } finally {
+            session.close();
+            sessionFactory.close();
+        }
+    }
+
+    public static void saveNewItemAndNewPerson() {
+
+        Configuration configuration = new Configuration()
+                .addAnnotatedClass(Person.class)
+                .addAnnotatedClass(Item.class);
+
+        SessionFactory sessionFactory = configuration.buildSessionFactory();
+        Session session = sessionFactory.getCurrentSession();
+
+        try {
+            session.beginTransaction();
+
+            Person newPerson = new Person("Jack", 44);
+            Item newItem = new Item("Sega", newPerson);
+
+            newPerson.setItems(new ArrayList<>(Collections.singleton(newItem)));
+
+            session.save(newPerson);
+            session.save(newItem);
+
+            session.getTransaction().commit();
+        } finally {
+            session.close();
+            sessionFactory.close();
+        }
+    }
+
+    public static void deleteItemByPersonId(int person_id) {
+
+        Configuration configuration = new Configuration()
+                .addAnnotatedClass(Person.class)
+                .addAnnotatedClass(Item.class);
+
+        SessionFactory sessionFactory = configuration.buildSessionFactory();
+        Session session = sessionFactory.getCurrentSession();
+
+        try {
+            session.beginTransaction();
+
+            Person person = session.get(Person.class, person_id);
+
+            List<Item> items = person.getItems();
+
+            // Порождает sql запрос
+            for (Item item : items)
+                session.remove(item);
+
+            // Не порождает sql запрос, но необходимо для синхронизации кэша и базы данных
+            person.getItems().clear();
+
+            session.getTransaction().commit();
+        } finally {
+            session.close();
+            sessionFactory.close();
+        }
+    }
+
+    public static void deletePersonById(int person_id) {
+
+        Configuration configuration = new Configuration()
+                .addAnnotatedClass(Person.class)
+                .addAnnotatedClass(Item.class);
+
+        SessionFactory sessionFactory = configuration.buildSessionFactory();
+        Session session = sessionFactory.getCurrentSession();
+
+        try {
+            session.beginTransaction();
+
+            Person person = session.get(Person.class, person_id);
+
+            // Порождает sql запрос
+            session.remove(person);
+
+            // Не порождает sql запрос, но необходимо для синхронизации кэша и базы данных
+            person.getItems().forEach(i -> i.setOwner(null));
+
+            session.getTransaction().commit();
+        } finally {
+            session.close();
+            sessionFactory.close();
+        }
+    }
+
+    public static void setNewOwnerForItem(int newOwner_id, int item_id) {
+
+        Configuration configuration = new Configuration()
+                .addAnnotatedClass(Person.class)
+                .addAnnotatedClass(Item.class);
+
+        SessionFactory sessionFactory = configuration.buildSessionFactory();
+        Session session = sessionFactory.getCurrentSession();
+
+        try {
+            session.beginTransaction();
+
+            Person person = session.get(Person.class, newOwner_id);
+            Item item = session.get(Item.class, item_id);
+
+            // Не порождает sql запрос, но необходимо для синхронизации кэша и базы данных
+            person.getItems().add(item);
+            item.getOwner().getItems().remove(item);
+
+            // Порождает sql запрос
+            item.setOwner(person);
+
+            session.getTransaction().commit();
+        } finally {
+            sessionFactory.close();
+        }
+    }
+
 }
