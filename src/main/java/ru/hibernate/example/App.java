@@ -3,6 +3,7 @@ package ru.hibernate.example;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.*;
 import ru.hibernate.example.model.Item;
+import ru.hibernate.example.model.Passport;
 import ru.hibernate.example.model.Person;
 
 import java.util.ArrayList;
@@ -12,14 +13,17 @@ import java.util.List;
 public class App {
     public static void main(String[] args) {
 
-        // simpleExample();
+        // One To many
+//        simpleExample_OneToMany();
+//        advancedExample_OneToMany();
 
-        advancedExample();
+        // One to One
+        example_OneToOne();
 
     }
 
 
-    public static void simpleExample() {
+    public static void simpleExample_OneToMany() {
 
         Person person = getPerson(1); // get person from DB
 
@@ -40,18 +44,6 @@ public class App {
         getPeopleHQL(); // HQL
 
     }
-
-    public static void advancedExample() {
-
-//        getItemsByPersonId(1);
-//        getPersonByItemId(3);
-//        saveNewItem(4);
-//        saveNewItemAndNewPerson();
-//        deleteItemByPersonId(1);
-        //deletePersonById(6);
-        setNewOwnerForItem(4, 7);
-    }
-
 
     public static Person getPerson(int id) {
 
@@ -113,7 +105,10 @@ public class App {
 
     public static void deletePerson(int id) {
 
-        Configuration configuration = new Configuration().addAnnotatedClass(Person.class);
+        Configuration configuration = new Configuration()
+                .addAnnotatedClass(Person.class)
+                .addAnnotatedClass(Passport.class)
+                .addAnnotatedClass(Item.class);
 
         SessionFactory sessionFactory = configuration.buildSessionFactory();
         Session session = sessionFactory.getCurrentSession();
@@ -153,6 +148,17 @@ public class App {
         }
     }
 
+
+    public static void advancedExample_OneToMany() {
+
+//        getItemsByPersonId(1);
+//        getPersonByItemId(3);
+//        saveNewItem(4);
+//        saveNewItemAndNewPerson();
+//        deleteItemByPersonId(1);
+        //deletePersonById(6);
+        setNewOwnerForItem(4, 7);
+    }
 
     public static void getItemsByPersonId(int id) {
 
@@ -329,6 +335,106 @@ public class App {
 
             // Порождает sql запрос
             item.setOwner(person);
+
+            session.getTransaction().commit();
+        } finally {
+            sessionFactory.close();
+        }
+    }
+
+
+    public static void example_OneToOne() {
+         addNewPersonAndNewPassport();
+//        getPassportByPersonId(16);
+//        getPersonByPassportOwner(16);
+//        changePassportNumberByPersonId(16);
+//        deletePerson(16);
+    }
+
+    public static void addNewPersonAndNewPassport() {
+
+        Configuration configuration = new Configuration()
+                .addAnnotatedClass(Person.class)
+                .addAnnotatedClass(Passport.class)
+                .addAnnotatedClass(Item.class);
+
+        SessionFactory sessionFactory = configuration.buildSessionFactory();
+        Session session = sessionFactory.getCurrentSession();
+
+        try {
+            session.beginTransaction();
+
+            Person person = new Person("test", 27);
+            Passport passport = new Passport(234);
+            person.setPassport(passport);
+
+            session.persist(person);
+            session.getTransaction().commit();
+        } finally {
+            sessionFactory.close();
+        }
+    }
+
+    public static void getPassportByPersonId(int id) {
+
+        Configuration configuration = new Configuration()
+                .addAnnotatedClass(Person.class)
+                .addAnnotatedClass(Passport.class)
+                .addAnnotatedClass(Item.class);
+
+        SessionFactory sessionFactory = configuration.buildSessionFactory();
+        Session session = sessionFactory.getCurrentSession();
+
+        try {
+            session.beginTransaction();
+
+            Person person = session.get(Person.class, id);
+
+            System.out.println(person.getPassport().getPassportNumber());
+
+            session.getTransaction().commit();
+        } finally {
+            sessionFactory.close();
+        }
+    }
+
+    public static void getPersonByPassportOwner(int id) {
+
+        Configuration configuration = new Configuration()
+                .addAnnotatedClass(Person.class)
+                .addAnnotatedClass(Passport.class)
+                .addAnnotatedClass(Item.class);
+
+        SessionFactory sessionFactory = configuration.buildSessionFactory();
+        Session session = sessionFactory.getCurrentSession();
+
+        try {
+            session.beginTransaction();
+
+            Passport passport = session.get(Passport.class, id);
+            System.out.println(passport.getPerson().getName());
+
+            session.getTransaction().commit();
+        } finally {
+            sessionFactory.close();
+        }
+    }
+
+    public static void changePassportNumberByPersonId(int id) {
+
+        Configuration configuration = new Configuration()
+                .addAnnotatedClass(Person.class)
+                .addAnnotatedClass(Passport.class)
+                .addAnnotatedClass(Item.class);
+
+        SessionFactory sessionFactory = configuration.buildSessionFactory();
+        Session session = sessionFactory.getCurrentSession();
+
+        try {
+            session.beginTransaction();
+
+            Person person = session.get(Person.class, id);
+            person.getPassport().setPassportNumber(99999);
 
             session.getTransaction().commit();
         } finally {
