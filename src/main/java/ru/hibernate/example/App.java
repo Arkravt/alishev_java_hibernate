@@ -2,23 +2,25 @@ package ru.hibernate.example;
 
 import org.hibernate.cfg.Configuration;
 import org.hibernate.*;
-import ru.hibernate.example.model.Item;
-import ru.hibernate.example.model.Passport;
-import ru.hibernate.example.model.Person;
+import ru.hibernate.example.model.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public class App {
     public static void main(String[] args) {
 
-        // One To many
+//         One To many
 //        simpleExample_OneToMany();
 //        advancedExample_OneToMany();
 
-        // One to One
-        example_OneToOne();
+//        One to One
+//        example_OneToOne();
+
+//        Many to Many
+        example_ManyToMany();
 
     }
 
@@ -44,6 +46,34 @@ public class App {
         getPeopleHQL(); // HQL
 
     }
+
+    public static void advancedExample_OneToMany() {
+
+//        getItemsByPersonId(1);
+//        getPersonByItemId(3);
+//        saveNewItem(4);
+//        saveNewItemAndNewPerson();
+//        deleteItemByPersonId(1);
+//        deletePersonById(6);
+//        setNewOwnerForItem(4, 7);
+    }
+
+    public static void example_OneToOne() {
+
+//        addNewPersonAndNewPassport();
+//        getPassportByPersonId(16);
+//        getPersonByPassportOwner(16);
+//        changePassportNumberByPersonId(16);
+//        deletePerson(16);
+    }
+
+    public static void example_ManyToMany() {
+
+//        addNewMovieAndActor();
+//        getActorsByMovie();
+
+    }
+
 
     public static Person getPerson(int id) {
 
@@ -148,17 +178,6 @@ public class App {
         }
     }
 
-
-    public static void advancedExample_OneToMany() {
-
-//        getItemsByPersonId(1);
-//        getPersonByItemId(3);
-//        saveNewItem(4);
-//        saveNewItemAndNewPerson();
-//        deleteItemByPersonId(1);
-        //deletePersonById(6);
-        setNewOwnerForItem(4, 7);
-    }
 
     public static void getItemsByPersonId(int id) {
 
@@ -343,14 +362,6 @@ public class App {
     }
 
 
-    public static void example_OneToOne() {
-         addNewPersonAndNewPassport();
-//        getPassportByPersonId(16);
-//        getPersonByPassportOwner(16);
-//        changePassportNumberByPersonId(16);
-//        deletePerson(16);
-    }
-
     public static void addNewPersonAndNewPassport() {
 
         Configuration configuration = new Configuration()
@@ -442,4 +453,50 @@ public class App {
         }
     }
 
+
+    public static void addNewMovieAndActor() {
+
+        Configuration configuration = new Configuration()
+                .addAnnotatedClass(Movie.class).addAnnotatedClass(Actor.class);
+
+        SessionFactory sessionFactory = configuration.buildSessionFactory();
+
+//        try with resources
+        try (sessionFactory) {
+            Session session = sessionFactory.getCurrentSession();
+            session.beginTransaction();
+
+            Movie movie = new Movie("The best movie", 2010);
+            Actor actor1 = new Actor("Tom", 33);
+            Actor actor2 = new Actor("Poly", 28);
+
+            movie.setActors(new ArrayList<>(List.of(actor1, actor2)));
+
+            actor1.setMovies(new ArrayList<>(Arrays.asList(movie)));
+            actor2.setMovies(new ArrayList<>(Arrays.asList(movie)));
+
+            session.save(movie);
+
+            session.save(actor1);
+            session.save(actor2);
+
+            session.getTransaction().commit();
+        }
+    }
+
+    public static void getActorsByMovie() {
+
+        Configuration configuration = new Configuration()
+                .addAnnotatedClass(Actor.class).addAnnotatedClass(Movie.class);
+
+        SessionFactory sessionFactory = configuration.buildSessionFactory();
+
+        try(sessionFactory) {
+            Session session = sessionFactory.getCurrentSession();
+            session.beginTransaction();
+
+
+            session.getTransaction().commit();
+        }
+    }
 }
