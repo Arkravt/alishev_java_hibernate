@@ -32,7 +32,6 @@ public class Actor {
     public Actor(String name, int age) {
         this.name = name;
         this.age = age;
-        int a;
     }
 
 
