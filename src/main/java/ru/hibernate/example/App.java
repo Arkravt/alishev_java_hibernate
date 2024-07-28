@@ -71,6 +71,7 @@ public class App {
 
 //        addNewMovieAndActor();
 //        getActorsByMovie();
+//        addNewMovieForActor();
 
     }
 
@@ -455,7 +456,6 @@ public class App {
 
 
     public static void addNewMovieAndActor() {
-
         Configuration configuration = new Configuration()
                 .addAnnotatedClass(Movie.class).addAnnotatedClass(Actor.class);
 
@@ -485,16 +485,47 @@ public class App {
     }
 
     public static void getActorsByMovie() {
-
         Configuration configuration = new Configuration()
                 .addAnnotatedClass(Actor.class).addAnnotatedClass(Movie.class);
 
         SessionFactory sessionFactory = configuration.buildSessionFactory();
 
-        try(sessionFactory) {
+        try (sessionFactory) {
             Session session = sessionFactory.getCurrentSession();
             session.beginTransaction();
 
+            Movie movie = session.get(Movie.class, 1);
+            List<Actor> actors = movie.getActors();
+
+            actors.forEach(e -> System.out.println(e.getName()));
+
+            session.getTransaction().commit();
+        }
+    }
+
+    public static void addNewMovieForActor() {
+        Configuration configuration = new Configuration()
+                .addAnnotatedClass(Actor.class).addAnnotatedClass(Movie.class);
+
+        SessionFactory sessionFactory = configuration.buildSessionFactory();
+
+        try (sessionFactory) {
+            Session session = sessionFactory.getCurrentSession();
+
+            session.beginTransaction();
+
+            Actor actor = session.get(Actor.class, 2);
+            Movie newMovie = new Movie("Good race", 2003);
+
+            if (newMovie.getActors() == null) {
+                newMovie.setActors(Arrays.asList(actor));
+            } else {
+                newMovie.getActors().add(actor);
+            }
+
+            actor.getMovies().add(newMovie);
+
+            session.save(newMovie);
 
             session.getTransaction().commit();
         }
