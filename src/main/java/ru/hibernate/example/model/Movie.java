@@ -29,6 +29,7 @@ public class Movie {
     public Movie(String name, int yearOfProduction) {
         this.name = name;
         this.yearOfProduction = yearOfProduction;
+        int a;
     }
 
 
