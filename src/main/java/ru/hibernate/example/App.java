@@ -4,6 +4,7 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.*;
 import ru.hibernate.example.model.*;
 
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -72,7 +73,7 @@ public class App {
 //        addNewMovieAndActor();
 //        getActorsByMovie();
 //        addNewMovieForActor();
-
+        deleteMovieFromPerson();
     }
 
 
@@ -511,11 +512,10 @@ public class App {
 
         try (sessionFactory) {
             Session session = sessionFactory.getCurrentSession();
-
             session.beginTransaction();
 
             Actor actor = session.get(Actor.class, 2);
-            Movie newMovie = new Movie("Good race", 2003);
+            Movie newMovie = new Movie("Gone", 2021);
 
             if (newMovie.getActors() == null) {
                 newMovie.setActors(Arrays.asList(actor));
@@ -526,6 +526,27 @@ public class App {
             actor.getMovies().add(newMovie);
 
             session.save(newMovie);
+
+            session.getTransaction().commit();
+        }
+    }
+
+    public static void deleteMovieFromPerson() {
+
+        Configuration configuration = new Configuration()
+                .addAnnotatedClass(Actor.class).addAnnotatedClass(Movie.class);
+
+        SessionFactory sessionFactory = configuration.buildSessionFactory();
+
+        try (sessionFactory) {
+            Session session = sessionFactory.getCurrentSession();
+            session.beginTransaction();
+
+            Actor actor = session.get(Actor.class, 2);
+            Movie movie = actor.getMovies().get(0);
+
+            actor.getMovies().remove(0);
+            movie.getActors().remove(actor);
 
             session.getTransaction().commit();
         }
