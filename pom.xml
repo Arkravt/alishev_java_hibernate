@@ -7,7 +7,7 @@
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>alishev_java_spring_hibernate</name>
+  <name>alishev_java_hibernate</name>
   <url>http://maven.apache.org</url>
 
   <properties>
